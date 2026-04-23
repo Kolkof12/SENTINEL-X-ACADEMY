@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duxlr Academy | By @wxl_e</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+
+        :root {
+            --bg-base: #0b0e11;
+            --bg-panel: #181a20;
+            --bg-hover: #2b3139;
+            --text-main: #eaecef;
+            --text-muted: #848e9c;
+            --up-color: #0ecb81;
+            --down-color: #f6465d;
+            --brand-color: #fcd535;
+            --border-color: #2b3139;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden; 
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .panel { background-color: var(--bg-panel); border: 1px solid var(--border-color); }
+        
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: var(--bg-base); }
+        ::-webkit-scrollbar-thumb { background: #474d57; border-radius: 4px; }
+
+        .btn-buy { background-color: var(--up-color); color: #fff; transition: 0.2s; }
+        .btn-buy:hover { background-color: #10a86e; transform: translateY(-1px); }
+        .btn-sell { background-color: var(--down-color); color: #fff; transition: 0.2s; }
+        .btn-sell:hover { background-color: #d1384b; transform: translateY(-1px); }
+
+        /* Academy & Auth Styles */
+        #auth-gate { backdrop-filter: blur(20px); z-index: 10000; }
+        .cyber-input { background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); transition: all 0.3s; }
+        .cyber-input:focus { border-color: var(--brand-color); box-shadow: 0 0 15px rgba(252, 213, 53, 0.1); }
+        
+        .message-box {
+            background: linear-gradient(135deg, rgba(252, 213, 53, 0.1) 0%, rgba(0,0,0,0.8) 100%);
+            border-left: 4px solid var(--brand-color);
+            transform: scale(0.95); opacity: 0; transition: all 0.5s;
+        }
+        .message-box.show { transform: scale(1); opacity: 1; }
+
+    </style>
+</head>
+<body class="text-sm relative">
+
+    <div id="auth-gate" class="fixed inset-0 bg-[#0b0e11]/90 flex items-center justify-center p-4">
+        <div class="panel w-full max-w-md p-8 rounded-2xl relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-[#fcd535] rounded-full filter blur-[80px] opacity-20"></div>
+            
+            <div class="text-center mb-8 relative z-10">
+                <h1 class="text-3xl font-black tracking-widest text-white mb-2">DUXLR <span class="text-[#fcd535]">ACADEMY</span></h1>
+                <p class="text-[#848e9c] text-[10px] uppercase tracking-[0.3em]">From Zero to Professional</p>
+                <div class="mt-2 inline-block px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[9px] font-bold text-gray-400">
+                    Developed by <span class="text-[#fcd535]">@wxl_e</span>
+                </div>
+            </div>
+
+            <div id="step-email" class="space-y-4 relative z-10">
+                <div class="space-y-2">
+                    <label class="text-[10px] uppercase font-bold text-gray-500">Trader Email Address</label>
+                    <input type="email" id="user-email" placeholder="student@academy.com" class="w-full cyber-input rounded-xl py-3 px-4 text-white outline-none">
+                </div>
+                <button onclick="requestAccess()" class="w-full bg-[#fcd535] hover:bg-yellow-400 text-black font-black py-3 rounded-xl uppercase tracking-widest text-xs transition-all shadow-[0_0_20px_rgba(252,213,53,0.2)]">
+                    Request Entry Code
+                </button>
+            </div>
+
+            <div id="step-code" class="hidden space-y-6 relative z-10">
+                
+                <div id="academy-message" class="message-box p-4 rounded-lg">
+                    <h4 class="text-[#fcd535] font-bold text-xs mb-2 flex items-center gap-2">
+                        <i class="fas fa-gem"></i> Aegis Academy Message
+                    </h4>
+                    <p class="text-[11px] text-gray-300 leading-relaxed italic">
+                        "Trading is not about predicting the future; it's about managing risk and mastering your mind. Discipline is your weapon, patience is your shield. Welcome to the elite circle."
+                    </p>
+                    <div class="mt-3 pt-3 border-t border-white/10 flex justify-between items-center">
+                        <span class="text-[10px] text-gray-500">Your Access Code:</span>
+                        <span class="font-black text-lg text-white mono tracking-widest">WXL-77</span>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-[10px] uppercase font-bold text-gray-500">Enter Access Code</label>
+                    <input type="text" id="access-code" placeholder="Enter code here..." class="w-full cyber-input rounded-xl py-3 px-4 text-white outline-none text-center font-bold tracking-widest uppercase">
+                </div>
+                <button onclick="verifyAndEnter()" class="w-full bg-white hover:bg-gray-200 text-black font-black py-3 rounded-xl uppercase tracking-widest text-xs transition-all">
+                    Initialize Sentinel-X <i class="fas fa-rocket ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="boot-screen" class="fixed inset-0 bg-[#0b0e11] flex flex-col items-center justify-center z-[9000] hidden">
+        <i class="fas fa-shield-alt text-4xl text-[#fcd535] mb-4"></i>
+        <h1 class="text-2xl font-bold tracking-widest mono text-white">SENTINEL-X <span class="text-[#fcd535]">ACADEMY</span></h1>
+        <p class="text-[#848e9c] text-xs mt-2 mono">LOADING TRAINING ENVIRONMENT...</p>
+        <div class="w-48 h-1 bg-gray-800 mt-6 overflow-hidden rounded">
+            <div class="h-full bg-[#fcd535] w-full animate-[progress_1.5s_ease-in-out]"></div>
+        </div>
+        <p class="absolute bottom-10 text-[10px] text-gray-600 font-mono">System Architect: @wxl_e</p>
+    </div>
+
+    <header class="h-14 border-b border-[var(--border-color)] flex items-center justify-between px-4 shrink-0 bg-[var(--bg-panel)]">
+        <div class="flex items-center gap-6">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-[#fcd535] rounded flex items-center justify-center text-black font-black">DX</div>
+                <div class="hidden md:block">
+                    <span class="font-bold text-lg tracking-wider block leading-none mt-1">DUXLR ACADEMY</span>
+                    <span class="text-[9px] text-[#fcd535] font-mono tracking-widest">BY @WXL_E</span>
+                </div>
+            </div>
+            <div class="h-6 w-px bg-[var(--border-color)] hidden md:block"></div>
+            <div class="hidden md:flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 px-3 py-1 rounded text-blue-400 text-[10px] uppercase font-bold tracking-widest">
+                <i class="fas fa-graduation-cap"></i> Training Mode Active
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-4">
+            <div class="hidden md:flex flex-col text-right">
+                <span id="display-email" class="text-xs text-[var(--text-muted)]">student@...</span>
+                <span class="text-[10px] text-green-500 font-bold flex items-center gap-1 justify-end">Aegis Secured</span>
+            </div>
+            <div class="h-8 px-3 rounded bg-[var(--bg-hover)] border border-[var(--border-color)] flex items-center gap-2">
+                <i class="fas fa-wallet text-[var(--text-muted)]"></i>
+                <span id="nav-balance" class="font-bold mono text-white">$0.00</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
+        
+        <div class="flex-1 flex flex-col min-w-0 border-r border-[var(--border-color)]">
+            <div class="flex-1 flex flex-col bg-[var(--bg-base)]">
+                <div class="h-10 border-b border-[var(--border-color)] flex items-center px-4 gap-4 text-xs font-medium text-[var(--text-muted)]">
+                    <span class="text-white border-b-2 border-[#fcd535] h-full flex items-center">Live Chart</span>
+                    <div class="flex items-center gap-2 ml-4">
+                        <span class="font-bold text-white">BTC/USDT</span>
+                        <span id="header-price" class="text-[var(--up-color)] font-bold mono">64,231.50</span>
+                    </div>
+                </div>
+                <div id="tvchart" class="flex-1 w-full h-full relative"></div>
+            </div>
+
+            <div class="h-64 border-t border-[var(--border-color)] panel flex flex-col shrink-0">
+                <div class="h-10 border-b border-[var(--border-color)] flex items-center px-4 gap-6 text-xs font-medium text-[var(--text-muted)]">
+                    <span class="text-white border-b-2 border-[#fcd535] h-full flex items-center">Active Trades (<span id="pos-count">0</span>)</span>
+                </div>
+                <div class="flex-1 overflow-auto p-4" id="portfolio-container">
+                    <div id="empty-state" class="h-full flex flex-col items-center justify-center text-[var(--text-muted)] opacity-50">
+                        <i class="fas fa-book-open text-3xl mb-2"></i>
+                        <p class="text-xs">No active trades. Analyze the chart and execute your first order.</p>
+                    </div>
+                    <table id="holdings-table" class="w-full text-left text-xs hidden">
+                        <thead class="text-[var(--text-muted)] border-b border-[var(--border-color)]">
+                            <tr>
+                                <th class="pb-2 font-normal">Asset</th>
+                                <th class="pb-2 font-normal text-right">Size</th>
+                                <th class="pb-2 font-normal text-right">Entry</th>
+                                <th class="pb-2 font-normal text-right">Current</th>
+                                <th class="pb-2 font-normal text-right">Profit/Loss</th>
+                            </tr>
+                        </thead>
+                        <tbody id="holdings-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full md:w-[320px] lg:w-[350px] flex flex-col shrink-0 bg-[var(--bg-panel)] relative">
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] overflow-hidden z-0">
+                <span class="text-8xl font-black rotate-[-45deg] whitespace-nowrap">@WXL_E</span>
+            </div>
+
+            <div class="h-1/2 border-b border-[var(--border-color)] flex flex-col relative z-10">
+                <div class="h-10 flex items-center px-4 justify-between text-xs text-[var(--text-muted)] border-b border-[var(--border-color)]">
+                    <span>Price(USDT)</span><span>Amount(BTC)</span>
+                </div>
+                <div class="flex-1 flex flex-col overflow-hidden text-xs mono">
+                    <div class="flex-1 overflow-hidden flex flex-col-reverse p-1" id="orderbook-asks"></div>
+                    <div class="h-10 shrink-0 flex items-center justify-between px-3 border-y border-[var(--border-color)] bg-[var(--bg-hover)]">
+                        <span id="spread-price" class="text-[var(--up-color)] text-lg font-bold">64,231.50</span>
+                        <span class="text-[var(--text-muted)] text-[10px]">Mark Price</span>
+                    </div>
+                    <div class="flex-1 overflow-hidden p-1" id="orderbook-bids"></div>
+                </div>
+            </div>
+
+            <div class="h-1/2 p-4 flex flex-col overflow-y-auto relative z-10">
+                <div class="flex justify-between text-xs text-[var(--text-muted)] mb-2">
+                    <span>Available Funds</span>
+                    <span id="avail-balance" class="text-white font-bold mono">0.00 USDT</span>
+                </div>
+
+                <div class="bg-[var(--bg-base)] border border-[var(--border-color)] rounded flex items-center px-3 h-10 mb-3 focus-within:border-[#fcd535] transition">
+                    <span class="text-[var(--text-muted)] text-xs w-12">Price</span>
+                    <input type="text" id="order-price" readonly class="bg-transparent flex-1 text-right text-white font-bold outline-none mono text-sm">
+                </div>
+
+                <div class="bg-[var(--bg-base)] border border-[var(--border-color)] rounded flex items-center px-3 h-10 mb-6 focus-within:border-[#fcd535] transition">
+                    <span class="text-[var(--text-muted)] text-xs w-12">Total</span>
+                    <input type="number" id="order-amount" placeholder="0.00" class="bg-transparent flex-1 text-right text-white font-bold outline-none mono text-sm">
+                    <span class="text-[var(--text-muted)] text-xs ml-2">USDT</span>
+                </div>
+
+                <div class="flex gap-2 mt-auto">
+                    <button onclick="executeTrade('BUY')" class="flex-1 btn-buy h-10 rounded font-bold uppercase tracking-wider text-xs">Buy BTC</button>
+                    <button onclick="executeTrade('SELL')" class="flex-1 btn-sell h-10 rounded font-bold uppercase tracking-wider text-xs">Sell BTC</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification-container" class="fixed top-16 right-4 z-50 flex flex-col gap-2"></div>
+
+    <script>
+        // --- 1. AUTHENTICATION SYSTEM ---
+        function requestAccess() {
+            const email = document.getElementById('user-email').value;
+            if(!email.includes('@')) return notify('Please enter a valid email to start learning.', 'error');
+            
+            document.getElementById('step-email').classList.add('hidden');
+            document.getElementById('step-code').classList.remove('hidden');
+            
+            // Show the great message with animation
+            setTimeout(() => {
+                document.getElementById('academy-message').classList.add('show');
+                notify('Aegis System: Check your simulation inbox for the code.', 'success');
+            }, 500);
+        }
+
+        function verifyAndEnter() {
+            const code = document.getElementById('access-code').value.toUpperCase();
+            if(code !== 'WXL-77') return notify('Invalid Code. The path to professionalism requires precision.', 'error');
+
+            const email = document.getElementById('user-email').value;
+            document.getElementById('display-email').innerText = email;
+
+            // Transition logic
+            document.getElementById('auth-gate').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('auth-gate').style.display = 'none';
+                const boot = document.getElementById('boot-screen');
+                boot.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    boot.style.opacity = '0';
+                    setTimeout(() => boot.classList.add('hidden'), 500);
+                    initPlatform(); // Start everything
+                }, 2000);
+            }, 500);
+        }
+
+        // --- 2. PLATFORM LOGIC ---
+        let balanceUSDT = parseFloat(localStorage.getItem('trade_balance')) || 0;
+        let holdingsBTC = parseFloat(localStorage.getItem('btc_holdings')) || 0;
+        let avgEntryPrice = parseFloat(localStorage.getItem('btc_avg_price')) || 0;
+        let currentPrice = 64231.50;
+        let chartData = [];
+        let candleSeries;
+
+        function formatMoney(num) { return num.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}); }
+        function formatCrypto(num) { return num.toLocaleString('en-US', {minimumFractionDigits: 5, maximumFractionDigits: 5}); }
+
+        function updateWallets() {
+            document.getElementById('nav-balance').innerText = `$${formatMoney(balanceUSDT)}`;
+            document.getElementById('avail-balance').innerText = `${formatMoney(balanceUSDT)} USDT`;
+            updatePortfolioUI();
+        }
+
+        function initPlatform() {
+            updateWallets();
+            
+            const chartContainer = document.getElementById('tvchart');
+            const chart = LightweightCharts.createChart(chartContainer, {
+                layout: { background: { color: '#0b0e11' }, textColor: '#848e9c' },
+                grid: { vertLines: { color: '#181a20' }, horzLines: { color: '#181a20' } },
+                crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+                rightPriceScale: { borderColor: '#2b3139' },
+                timeScale: { borderColor: '#2b3139' },
+            });
+
+            candleSeries = chart.addCandlestickSeries({
+                upColor: '#0ecb81', downColor: '#f6465d', borderVisible: false,
+                wickUpColor: '#0ecb81', wickDownColor: '#f6465d',
+            });
+
+            let t = new Date();
+            t.setHours(t.getHours() - 100);
+            for(let i = 0; i < 150; i++) {
+                let open = i === 0 ? 63000 : chartData[i-1].close;
+                let close = open + (Math.random() - 0.5) * 400;
+                chartData.push({ time: t.getTime() / 1000, open, high: Math.max(open, close) + 100, low: Math.min(open, close) - 100, close });
+                t.setMinutes(t.getMinutes() + 15);
+            }
+            candleSeries.setData(chartData);
+
+            new ResizeObserver(entries => {
+                if (entries.length === 0 || entries[0].target !== chartContainer) return;
+                chart.applyOptions({ width: entries[0].contentRect.width, height: entries[0].contentRect.height });
+            }).observe(chartContainer);
+
+            setInterval(tickSimulation, 800);
+        }
+
+        function tickSimulation() {
+            const lastCandle = chartData[chartData.length - 1];
+            const change = (Math.random() - 0.5) * 150;
+            currentPrice = lastCandle.close + change;
+            
+            candleSeries.update({
+                time: lastCandle.time, open: lastCandle.open,
+                high: Math.max(lastCandle.high, currentPrice),
+                low: Math.min(lastCandle.low, currentPrice), close: currentPrice
+            });
+
+            const priceStr = formatMoney(currentPrice);
+            document.getElementById('header-price').innerText = priceStr;
+            document.getElementById('spread-price').innerText = priceStr;
+            document.getElementById('order-price').value = currentPrice.toFixed(2);
+            
+            document.getElementById('header-price').className = `font-bold mono ${change >= 0 ? 'text-[var(--up-color)]' : 'text-[var(--down-color)]'}`;
+            document.getElementById('spread-price').className = `text-lg font-bold ${change >= 0 ? 'text-[var(--up-color)]' : 'text-[var(--down-color)]'}`;
+
+            updateOrderBook();
+            updatePortfolioUI();
+        }
+
+        function updateOrderBook() {
+            let asksHTML = '', bidsHTML = '';
+            let askPrice = currentPrice, bidPrice = currentPrice;
+
+            for(let i=0; i<12; i++) {
+                askPrice += (Math.random() * 5);
+                asksHTML += `<div class="flex justify-between py-[2px] px-2 relative"><div class="absolute right-0 top-0 h-full bg-[#f6465d] opacity-10" style="width: ${Math.random()*100}%"></div><span class="text-[var(--down-color)] z-10">${formatMoney(askPrice)}</span><span class="text-white z-10">${(Math.random() * 2).toFixed(4)}</span></div>`;
+                
+                bidPrice -= (Math.random() * 5);
+                bidsHTML += `<div class="flex justify-between py-[2px] px-2 relative"><div class="absolute right-0 top-0 h-full bg-[#0ecb81] opacity-10" style="width: ${Math.random()*100}%"></div><span class="text-[var(--up-color)] z-10">${formatMoney(bidPrice)}</span><span class="text-white z-10">${(Math.random() * 2).toFixed(4)}</span></div>`;
+            }
+            document.getElementById('orderbook-asks').innerHTML = asksHTML;
+            document.getElementById('orderbook-bids').innerHTML = bidsHTML;
+        }
+
+        function executeTrade(type) {
+            const amountUSDT = parseFloat(document.getElementById('order-amount').value);
+            if (!amountUSDT || amountUSDT <= 0) return notify('Enter a valid amount to practice.', 'error');
+
+            if (type === 'BUY') {
+                if (amountUSDT > balanceUSDT) return notify('Insufficient virtual balance. Add funds from Duxlr Bank.', 'error');
+                const btcBought = amountUSDT / currentPrice;
+                avgEntryPrice = ((holdingsBTC * avgEntryPrice) + amountUSDT) / (holdingsBTC + btcBought);
+                holdingsBTC += btcBought; balanceUSDT -= amountUSDT;
+                notify(`Academy Order: Bought ${formatCrypto(btcBought)} BTC`, 'success');
+            } else {
+                const btcToSell = amountUSDT / currentPrice;
+                if (btcToSell > holdingsBTC) return notify('Insufficient BTC to sell.', 'error');
+                holdingsBTC -= btcToSell; balanceUSDT += amountUSDT;
+                if(holdingsBTC < 0.00001) { holdingsBTC = 0; avgEntryPrice = 0; }
+                notify(`Academy Order: Sold ${formatCrypto(btcToSell)} BTC`, 'success');
+            }
+
+            localStorage.setItem('trade_balance', balanceUSDT);
+            localStorage.setItem('btc_holdings', holdingsBTC);
+            localStorage.setItem('btc_avg_price', avgEntryPrice);
+            document.getElementById('order-amount').value = '';
+            updateWallets();
+        }
+
+        function updatePortfolioUI() {
+            const emptyState = document.getElementById('empty-state');
+            const table = document.getElementById('holdings-table');
+            const tbody = document.getElementById('holdings-body');
+            
+            if (holdingsBTC <= 0) {
+                emptyState.classList.remove('hidden'); table.classList.add('hidden');
+                document.getElementById('pos-count').innerText = '0'; return;
+            }
+
+            emptyState.classList.add('hidden'); table.classList.remove('hidden');
+            document.getElementById('pos-count').innerText = '1';
+
+            const pnl = (holdingsBTC * currentPrice) - (holdingsBTC * avgEntryPrice);
+            const roe = (pnl / (holdingsBTC * avgEntryPrice)) * 100;
+            
+            tbody.innerHTML = `
+                <tr class="border-b border-[var(--border-color)]">
+                    <td class="py-3 font-bold text-[#fcd535]">BTC/USDT</td>
+                    <td class="py-3 text-right mono text-white">${formatCrypto(holdingsBTC)}</td>
+                    <td class="py-3 text-right mono text-[var(--text-muted)]">${formatMoney(avgEntryPrice)}</td>
+                    <td class="py-3 text-right mono text-[var(--text-muted)]">${formatMoney(currentPrice)}</td>
+                    <td class="py-3 text-right mono font-bold ${pnl >= 0 ? 'text-[var(--up-color)]' : 'text-[var(--down-color)]'}">${pnl >= 0 ? '+' : ''}${formatMoney(pnl)}</td>
+                </tr>`;
+        }
+
+        function notify(msg, type = 'success') {
+            const container = document.getElementById('notification-container');
+            const toast = document.createElement('div');
+            toast.className = `bg-[var(--bg-panel)] border-l-4 ${type === 'success' ? 'border-[#0ecb81]' : 'border-[#f6465d]'} p-4 rounded shadow-2xl flex items-center gap-3 w-80 transform transition-all translate-x-full`;
+            toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle text-[#0ecb81]' : 'fa-exclamation-circle text-[#f6465d]'}"></i> <span class="font-medium text-white text-xs leading-tight">${msg}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.remove('translate-x-full'), 10);
+            setTimeout(() => { toast.classList.add('translate-x-full', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 4000);
+        }
+
+        window.addEventListener('storage', (e) => {
+            if(e.key === 'trade_balance') { balanceUSDT = parseFloat(e.newValue); updateWallets(); notify('Academy Funds Received from Bank', 'success'); }
+        });
+    </script>
+</body>
+</html>
